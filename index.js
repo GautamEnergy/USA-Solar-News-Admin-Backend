@@ -11,7 +11,7 @@ app.use(cors())
 async function fetchNews(req,res) {
  const {search,from,Page} = req.query
   try {
-    const {data} = await axios.get(`https://newsapi.org/v2/everything?q=${search}&from=${from}&sortBy=publishedAt&page=${Page}&language=en&pageSize=10&apiKey=b80e023cf58d4838a381be9697e7611a`)
+    const {data} = await axios.get(`https://newsapi.org/v2/everything?q=${search}&from=${from}&sortBy=publishedAt&page=${Page}&language=en&pageSize=10&apiKey=4e7a71ac960e43da99062af4b0b405f3`)
        res.send(data)
      
   } catch (error) {
