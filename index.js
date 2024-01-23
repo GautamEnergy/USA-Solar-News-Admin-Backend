@@ -30,6 +30,6 @@ app.get('/News',fetchNews)
 
 
 
-app.listen(900,()=>{
+app.listen(process.env.Port,()=>{
     console.log("server is running")
 })
