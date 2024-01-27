@@ -29,10 +29,10 @@ app.use(cors())
 
 
 
-let News = []
+
 
 async function Rss(req,res) {
-
+  let News = []
   try {
 
     let feed = await parser.parseURL('https://www.canarymedia.com/rss.rss');
