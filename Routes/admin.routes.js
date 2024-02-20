@@ -59,6 +59,5 @@ UserRouter.get('/News',getNews)
 /** To Delete Document  */
 UserRouter.delete('/delete', deleteDocumentById)
 
-UserRouter.post('/CompareFaces',upload.single('file'),CompareFaces)
 
 module.exports = { UserRouter } 
