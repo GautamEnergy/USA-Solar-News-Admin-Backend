@@ -7,21 +7,18 @@ Welcome to the Solar News App API documentation! Below, you'll find information 
 ### 1. `admin/sendOTPforEmail` [POST]
 
 - **Description:** Sends an OTP for email verification for SignUp.
-- **Request Body:**  { Email, Password }
+- **Request Body:**  `` { Email, Password } ``
 - **Response:** Sends an OTP to the provided email address.
 - **Note:**  Sends an Authenticate Email, Not Randomly Email
 ### 2. `admin/SignUp` [POST]
 
 - **Description:** Signs up a new admin with OTP(Which has Sent On SignUp Email).
-- **Request Body:** ``` {
+- **Request Body:** `` {
         "OTP":"788"
-} ```
-
-
-- **Response:** `` {
-"message": "User Registered!!", 
-token: token
 } ``
+
+
+- **Response:** `` {"message": "User Registered!!", token: token} ``
 
 ### 3. `/login` [POST]
 
