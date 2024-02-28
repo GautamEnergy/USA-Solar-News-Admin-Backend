@@ -13,9 +13,9 @@ Welcome to the Solar News App API documentation! Below, you'll find information 
 ### 2. `admin/SignUp` [POST]
 
 - **Description:** Signs up a new admin with OTP(Which has Sent On SignUp Email).
-- **Request Body:** `` {
+- **Request Body:** ``` {
         "OTP":"788"
-} ``
+} ```
 
 
 - **Response:** `` {
