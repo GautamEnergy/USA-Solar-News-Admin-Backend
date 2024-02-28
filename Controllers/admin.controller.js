@@ -6,11 +6,14 @@ const { User } = require('../Models/admin.schema')
 const JWT = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
+const { v4: uuidv4 } = require('uuid');
+const multer = require('multer')
 require('dotenv').config()
 
 
-/*** Nodemailer-configuration */
 
+
+/*** Nodemailer-configuration */
 let otp = {}
 let verifyEmail;
 let verifypassword;
@@ -38,21 +41,23 @@ function generateOtp() {
 }
 
 
-
+/** ################################################################### */
 
 const create = async (req, res) => {
-    console.log(req.body)
+
+    const uuid = uuidv4()
     const { header, title, Description } = req.body
     const date = new Date(); // Generate current date in the required format
 
     // Definning the params variable to uplaod the photo
     const s3 = new Aws.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
-        secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET       // secretAccessKey is also store in .env file
+        secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET,
+        region: 'ap-south-1'       // secretAccessKey is also store in .env file
     })
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,      // bucket that we made earlier
-        Key: req.file.originalname,               // Name of the image
+        Key: uuid,               // Name of the image
         Body: req.file.buffer,                    // Body which will contain the image in buffer format
         ACL: "public-read-write",                 // defining the permissions to get the public link
         ContentType: req.body.FileFormat,               // Necessary to define the image content-type to view the photo in the browser with the link
@@ -73,7 +78,8 @@ const create = async (req, res) => {
             Description: Description,
             Date: date,
             ImageURL: data.Location,
-            header
+            header: header,
+            uuid: uuid
         });
 
         await news.save()
@@ -82,7 +88,9 @@ const create = async (req, res) => {
                     title,
                     Description,
                     Date: date,
-                    ImageURL: data.Location
+                    ImageURL: data.Location,
+                    header,
+                    uuid
                 })
             })
             .catch(err => {
@@ -99,7 +107,7 @@ const create = async (req, res) => {
     // }
 }
 
-
+/** ################################################################### */
 
 const OTPforSignUp = async (req, res) => {
 
@@ -160,7 +168,7 @@ const OTPforSignUp = async (req, res) => {
 }
 
 
-
+/** ################################################################### */
 const Signup = async (req, res) => {
 
 
@@ -179,7 +187,7 @@ const Signup = async (req, res) => {
 
                 await user.save()
 
-                const token = JWT.sign({ UserEmail: verifyEmail }, process.env.JWT_KEY)
+                const token = JWT.sign(process.env.JWT_KEY)
 
                 res.send({ "message": "User Registered!!", token: token })
 
@@ -197,6 +205,7 @@ const Signup = async (req, res) => {
     }
 }
 
+/** ################################################################### */
 const Login = async (req, res) => {
 
     let { Email, Password } = req.body
@@ -214,11 +223,11 @@ const Login = async (req, res) => {
 
                 if (result) {
 
-                    const token = JWT.sign({ UserID: user._id, UserEmail: user.Email }, "MyStore")
+                    const token = JWT.sign(process.env.JWT_KEY)
 
                     // console.log(token)
 
-                    res.send({ message: "login Successfull!!", "accessToken": token, "Name": user.Name })
+                    res.send({ message: "login Successfull!!", token: token })
 
                 } else {
 
@@ -239,8 +248,9 @@ const Login = async (req, res) => {
 
 }
 
-/************************** OTP For Reset Password ***************************/
 
+/** ################################################################### */
+/************************** OTP For Reset Password ***************************/
 const updateVerify = async (req, res) => {
 
     let { Email, Password } = req.body
@@ -305,8 +315,9 @@ const updateVerify = async (req, res) => {
 
 }
 
-/*************************************   Reset Password  ************************** */
 
+/** ################################################################### */
+/*************************************   Reset Password  ************************** */
 const ResetPassword = async (req, res) => {
 
     let { OTP } = req.body
@@ -365,6 +376,7 @@ const ResetPassword = async (req, res) => {
 
 }
 
+/** Delete News */
 const getNews = async (req, res) => {
     const { NoOfNews, Page } = req.query
 
@@ -391,15 +403,26 @@ const getNews = async (req, res) => {
 };
 
 
+
 /**************************************delete document by _id******************************************************** */
-const deleteDocumentById = async (req, res) => {
-    const { _id } = req.query;
+const deleteNews = async (req, res) => {
+    const { _id, uuid } = req.query;
 
     try {
         /************************************** here also should delete S3 Object, also have to implement that function************************************************/
+
+        const s3 = new Aws.S3({
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
+            secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET
+        })
+
+        await s3.deleteObject({
+            Key: uuid,
+            Bucket: process.env.AWS_BUCKET_NAME
+        }).promise()
         // Find the document by its _id and delete it
         const deletedDocument = await News.findByIdAndDelete(_id);
-        console.log(deletedDocument)
+        // console.log(deletedDocument)
         if (!deletedDocument) {
             return res.status(404).json({ message: "Document not found." });
         }
@@ -413,6 +436,49 @@ const deleteDocumentById = async (req, res) => {
 
 
 
+const UpdateNews = async (req, res) => {
+
+    const { _id, uuid } = req.query
+
+    if (req.body.FileFormat) {
+
+        const s3 = new Aws.S3({
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
+            secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET,
+            region: 'ap-south-1'       // secretAccessKey is also store in .env file
+        })
+        const params = {
+            Bucket: process.env.AWS_BUCKET_NAME,      // bucket that we made earlier
+            Key: uuid,               // Name of the image
+            Body: req.file.buffer,                    // Body which will contain the image in buffer format
+            ACL: "public-read-write",                 // defining the permissions to get the public link
+            ContentType: req.body.FileFormat,               // Necessary to define the image content-type to view the photo in the browser with the link
+        };
+
+        s3.upload(params, async (err, data) => {
+
+            if (err) {
+                res.send({ msg: err })
+            } else {
+                try {
+                    await News.updateOne({ _id: _id }, req.body)
+                    res.send({ msg: 'updated Succesfully' })
+                } catch (err) {
+                    res.send({ msg: err })
+                }
+            }
+        })
+    } else {
+        try {
+            await News.updateOne({ _id: _id }, req.body)
+            res.send({ msg: 'updated Succesfully' })
+        } catch (err) {
+            res.send({ msg: err })
+        }
+    }
+
+}
 
 
-module.exports = { Signup, OTPforSignUp, create, Login, updateVerify, ResetPassword, getNews, deleteDocumentById, CompareFaces }
+
+module.exports = { Signup, OTPforSignUp, create, Login, updateVerify, ResetPassword, getNews, deleteNews, UpdateNews }

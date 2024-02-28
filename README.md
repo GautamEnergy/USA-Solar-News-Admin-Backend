@@ -41,11 +41,41 @@ Welcome to the Solar News App API documentation! Below, you'll find information 
 ### 6. `admin/news` [GET]
 - **Description :** This Endpoint Will Send You Entire News.
 - **Request Body :** `` Nothing has to send in request body, just Get News ``
-- **Response :** ``` {
-"uuid": "39e5e277-2630-4792-bea7-ff02cb3c4e10",
-"ImageURL": "https://private-gautam-bucket.s3.ap-south-1.amazonaws.com/39e5e277-2630-4792-bea7-ff02cb3c4e10",
-"title": "Congress leader Pawan Khera alleged that these agencies are given “targets” to scare Opposition leaders and make them join the ruling party.",
+- **Response :** ``` [{
+"uuid": "xyz",
+"ImageURL": "https://private-gautam-bucket.s3.ap-south-1.amazonaws.com/xyz",
+"title": "title",
 "Description": "zsdfsdsdf",
-"Date": "Wed Feb 28 2024 12:23:19 GMT+0530 (India Standard Time)",
-"header": "Delhi News Live Updates Today: Meanwhile, the vote of confidence was passed in the Delhi Assembly with the support of 54 Aam Aadmi Party (AAP) MLAs, including CM Kejriwal."
-} ```
+"Date": "Date & Time",
+"header": "Header"
+},...] ```
+
+### 7. `admin/createNews`[POST]
+- **Description :** This Endpoint Will make News.
+- **Request Body :** ```[{
+            title: title,
+            Description: Description,
+            Date: date,
+            ImageURL: data.Location,
+            header: header,
+            uuid: uuid,
+            NewsImage:ImageFile
+        },
+        {
+           header:{
+            token : `JWT Token`
+           }
+        }] ```
+    - ***Note:*** ***For This Request, admin Has to Login First to Have JWT Token*** 
+- **Response :** ``` {
+                    title,
+                    Description,
+                    Date: date,
+                    ImageURL: data.Location,
+                    header,
+                    uuid
+                } ```
+
+
+
+**Note :** `` Always Remember For Creating News, You Will Have JWT Token, and For JWT Token Have to login First.``

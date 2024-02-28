@@ -11,7 +11,7 @@ app.use(cors())
 
 
 app.get('/',(req,res)=>{
-  res.send({msg:"hii"})
+  res.send({msg:"Welcome Solar News App"})
 })
 app.use('/admin',UserRouter)
 

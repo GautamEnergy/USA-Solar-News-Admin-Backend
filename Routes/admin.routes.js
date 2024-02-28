@@ -1,7 +1,7 @@
 const express = require('express')
-const { create, Signup, OTPforSignUp, Login, ResetPassword, updateVerify, getNews,deleteDocumentById,CompareFaces } = require('../Controllers/admin.controller')
+const { create, Signup, OTPforSignUp, Login, ResetPassword, updateVerify, getNews,deleteNews, UpdateNews } = require('../Controllers/admin.controller')
 const multer = require('multer')
-const { User } = require('../Models/admin.schema')
+const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
 
 
@@ -34,10 +34,9 @@ const filefilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: filefilter });
 
 
-UserRouter.post('/Upload', upload.single('productimage'), create)
 
 /** Send OTP for Verification */
-UserRouter.post('/SendOTPforEmail', OTPforSignUp)
+UserRouter.post('/sendOTPforEmail', OTPforSignUp)
 
 /** Signup Router */
 UserRouter.post('/SignUp', Signup)
@@ -47,17 +46,24 @@ UserRouter.post('/login', Login)
 
 
 /** Sending OTP to Reset Password */
-UserRouter.post('/OTPforResetPass', updateVerify)
+UserRouter.put('/otpforResetPassword', updateVerify)
 
 /** To Reset Password */
-UserRouter.post('/ResePassword', ResetPassword)
+UserRouter.put('/resetPassword', ResetPassword)
 
 
 /** To Get All News */
-UserRouter.get('/News',getNews)
+UserRouter.get('/news',getNews)
 
-/** To Delete Document  */
-UserRouter.delete('/delete', deleteDocumentById)
+/**    authentication Middleware    */
+UserRouter.use(authentication)
 
+/** To Create News */
+UserRouter.post('/createNews', upload.single('NewsImage'), create)
 
+/** To Delete News  */
+UserRouter.delete('/delete', deleteNews)
+
+/** To Update News */
+UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
 module.exports = { UserRouter } 

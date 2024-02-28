@@ -1,5 +1,9 @@
 const mongoose = require('mongoose')
 const NewsSchema = mongoose.Schema({
+    uuid:{
+      type:String,
+      required:true
+    },
  ImageURL:{
     type:String,
     required:true
