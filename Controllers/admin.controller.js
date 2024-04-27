@@ -71,12 +71,12 @@ const create = async (req, res) => {
         /** Saving Data in Database as Collection */
     let insertedData =    await News.insertMany({
         UUID:UUID,
-        ImageURL: `http://192.168.0.100:9090/admin/blogImage/${UUID}${req.file.originalname}`,
+        ImageURL: `http://localhost:9090/admin/blogImage/${UUID}${req.file.originalname}`,
         Header:Header,
         Body:Body
        })
       /** Send success response with the file URL */
-      res.send({ msg: 'Data inserted successfully!',ImageURL: `http://192.168.0.100:9090/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+      res.send({ msg: 'Data inserted successfully!',ImageURL: `http://localhost:9090/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
         } catch (err) {
           console.log(err);
           res.status(401).send(err);
