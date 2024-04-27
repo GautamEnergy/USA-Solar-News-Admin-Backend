@@ -1,5 +1,5 @@
 const express = require('express')
-const { create, Signup, OTPforSignUp, Login, ResetPassword, updateVerify, getNews,deleteNews, UpdateNews } = require('../Controllers/admin.controller')
+const { create, Signup, OTPforSignUp, Login, ResetPassword, updateVerify, getNews,deleteNews, UpdateNews, GetBlogImage } = require('../Controllers/admin.controller')
 const multer = require('multer')
 const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
@@ -55,11 +55,15 @@ UserRouter.put('/resetPassword', ResetPassword)
 /** To Get All News */
 UserRouter.get('/news',getNews)
 
-/**    authentication Middleware    */
-UserRouter.use(authentication)
+/** To Get Blog Image */
+UserRouter.get('/blogImage/:filename',GetBlogImage)
+
+
+ /**    authentication Middleware    */
+// UserRouter.use(authentication)
 
 /** To Create News */
-UserRouter.post('/createNews', upload.single('NewsImage'), create)
+UserRouter.post('/createNews', upload.single('BlogImage'), create)
 
 /** To Delete News  */
 UserRouter.delete('/delete', deleteNews)

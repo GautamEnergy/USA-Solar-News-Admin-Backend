@@ -24,15 +24,6 @@ app.use('/admin',UserRouter)
 
 
 
-
-
-
-
-
-
-
-
-
 app.listen(process.env.PORT, async()=>{
   try{
      await connect

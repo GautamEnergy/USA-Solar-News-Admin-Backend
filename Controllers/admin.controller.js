@@ -1,13 +1,12 @@
 
-const Aws = require('aws-sdk')                // aws-sdk library will used to upload image to s3 bucket.
-require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const { News } = require('../Models/News.Schema')
 const { User } = require('../Models/admin.schema')
 const JWT = require('jsonwebtoken')
+const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
-const { v4: uuidv4 } = require('uuid');
-const multer = require('multer')
+const Path = require('path');
+const fs = require('fs')
 require('dotenv').config()
 
 
@@ -45,60 +44,48 @@ function generateOtp() {
 
 const create = async (req, res) => {
 
-    const uuid = uuidv4()
-    const { header, title, Description } = req.body
-    const date = new Date(); // Generate current date in the required format
-
-    // Definning the params variable to uplaod the photo
-    const s3 = new Aws.S3({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
-        secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET,
-        region: 'ap-south-1'       // secretAccessKey is also store in .env file
-    })
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,      // bucket that we made earlier
-        Key: uuid,               // Name of the image
-        Body: req.file.buffer,                    // Body which will contain the image in buffer format
-        ACL: "public-read-write",                 // defining the permissions to get the public link
-        ContentType: req.body.FileFormat,               // Necessary to define the image content-type to view the photo in the browser with the link
-    };
-
-    // uplaoding the photo using s3 instance and saving the link in the database.
-
-    s3.upload(params, async (error, data) => {
-        if (error) {
-            res.status(500).send({ "err": error })  // if we get any error while uploading error message will be returned.
+     const UUID = uuidv4();
+    const { Header, Body } = req.body;
+    if(req.file.size){
+        /** making file in IPQC-Pdf-Folder*/
+        try {
+           /** Get the file buffer and the file format **/
+           const fileBuffer = req.file.buffer;
+          
+           /** Define the folder path **/
+           const folderPath = Path.join('Blog_Images');
+      
+           /** Create the folder if it doesn't exist **/
+           if (!fs.existsSync(folderPath)) {
+            console.log(folderPath)
+               fs.mkdirSync(folderPath, { recursive: true });
+           }
+           
+           /** Define the file path, including the desired file name and format */
+           const fileName = `${UUID}${req.file.originalname}`;
+           const filePath = Path.join(folderPath, fileName);
+      
+           /** Save the file buffer to the specified file path */
+        fs.writeFileSync(filePath, fileBuffer);
+      
+        /** Saving Data in Database as Collection */
+    let insertedData =    await News.insertMany({
+        UUID:UUID,
+        ImageURL: `http://192.168.0.100:9090/admin/blogImage/${UUID}${req.file.originalname}`,
+        Header:Header,
+        Body:Body
+       })
+      /** Send success response with the file URL */
+      res.send({ msg: 'Data inserted successfully!',ImageURL: `http://192.168.0.100:9090/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+        } catch (err) {
+          console.log(err);
+          res.status(401).send(err);
         }
+      }else{
+        res.status(401).send({status:false,'err':'file is empty'})
+      }
 
-
-
-        // saving the information in the database.   
-        const news = new News({
-            title: title,
-            Description: Description,
-            Date: date,
-            ImageURL: data.Location,
-            header: header,
-            uuid: uuid
-        });
-
-        await news.save()
-            .then(result => {
-                res.status(200).send({
-                    title,
-                    Description,
-                    Date: date,
-                    ImageURL: data.Location,
-                    header,
-                    uuid
-                })
-            })
-            .catch(err => {
-                console.log(err)
-
-                res.status(500).send({ message: err })
-            })
-    })
+  
 
     /**************************** Utilits for Frontend *****************/
     // function formatDate(date) {
@@ -106,6 +93,24 @@ const create = async (req, res) => {
     //     return date.toLocaleDateString('en-GB', options);
     // }
 }
+
+/** Get Blog Image */
+const GetBlogImage = async(req,res)=>{
+    const filename = req.params.filename;
+     /** Define the absolute path to the IPQC-Pdf-Folder directory */
+     const pdfFolderPath = Path.resolve('Blog_Images');
+  
+     /** Construct the full file path to the requested file */
+     const filePath = Path.join(pdfFolderPath, filename);
+  
+     /** Send the file to the client */
+     res.sendFile(filePath, (err) => {
+         if (err) {
+             console.error('Error sending file:', err);
+             res.status(404).send({ error: 'File not found' });
+         }
+     });
+  }
 
 /** ################################################################### */
 
@@ -411,17 +416,11 @@ const deleteNews = async (req, res) => {
     try {
         /************************************** here also should delete S3 Object, also have to implement that function************************************************/
 
-        const s3 = new Aws.S3({
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
-            secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET
-        })
+        
 
-        await s3.deleteObject({
-            Key: uuid,
-            Bucket: process.env.AWS_BUCKET_NAME
-        }).promise()
+     
         // Find the document by its _id and delete it
-        const deletedDocument = await News.findByIdAndDelete(_id);
+        const deletedDocument = await News.findOneAndDelete({UUID:uuid});
         // console.log(deletedDocument)
         if (!deletedDocument) {
             return res.status(404).json({ message: "Document not found." });
@@ -442,35 +441,12 @@ const UpdateNews = async (req, res) => {
 
     if (req.body.FileFormat) {
 
-        const s3 = new Aws.S3({
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,              // accessKeyId that is stored in .env file
-            secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET,
-            region: 'ap-south-1'       // secretAccessKey is also store in .env file
-        })
-        const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,      // bucket that we made earlier
-            Key: uuid,               // Name of the image
-            Body: req.file.buffer,                    // Body which will contain the image in buffer format
-            ACL: "public-read-write",                 // defining the permissions to get the public link
-            ContentType: req.body.FileFormat,               // Necessary to define the image content-type to view the photo in the browser with the link
-        };
-
-        s3.upload(params, async (err, data) => {
-
-            if (err) {
-                res.send({ msg: err })
-            } else {
-                try {
-                    await News.updateOne({ _id: _id }, req.body)
-                    res.send({ msg: 'updated Succesfully' })
-                } catch (err) {
-                    res.send({ msg: err })
-                }
-            }
-        })
+        
+       
+        
     } else {
         try {
-            await News.updateOne({ _id: _id }, req.body)
+            await News.updateOne({ UUID:uuid }, req.body)
             res.send({ msg: 'updated Succesfully' })
         } catch (err) {
             res.send({ msg: err })
@@ -481,4 +457,4 @@ const UpdateNews = async (req, res) => {
 
 
 
-module.exports = { Signup, OTPforSignUp, create, Login, updateVerify, ResetPassword, getNews, deleteNews, UpdateNews }
+module.exports = { Signup, OTPforSignUp, create, Login, updateVerify, ResetPassword, getNews, deleteNews, UpdateNews, GetBlogImage }
