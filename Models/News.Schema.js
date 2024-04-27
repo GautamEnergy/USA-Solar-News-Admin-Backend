@@ -7,14 +7,7 @@ const NewsSchema = mongoose.Schema({
     ImageURL: {
         type: String,
         required: true,
-        trim: true, // Trim whitespace
-        validate: {
-            validator: function(v) {
-                // Validate URL format
-                return /^(http?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
-            },
-            message: props => `${props.value} is not a valid URL`
-        }
+        trim: true, // Trim whitespac
     },
     Header: {
         type: String,
