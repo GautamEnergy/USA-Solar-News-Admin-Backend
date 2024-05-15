@@ -1,5 +1,5 @@
 const express = require('express')
-const { create, Signup, OTPforSignUp, Login, ResetPassword, updateVerify, getNews,deleteNews, UpdateNews, GetBlogImage } = require('../Controllers/admin.controller')
+const { create, getNews,deleteNews, UpdateNews, GetBlogImage } = require('../Controllers/admin.controller')
 const multer = require('multer')
 const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
@@ -36,20 +36,20 @@ const upload = multer({ storage: storage, fileFilter: filefilter });
 
 
 /** Send OTP for Verification */
-UserRouter.post('/sendOTPforEmail', OTPforSignUp)
+//UserRouter.post('/sendOTPforEmail', OTPforSignUp)
 
 /** Signup Router */
-UserRouter.post('/SignUp', Signup)
+//UserRouter.post('/SignUp', Signup)
 
 /*** Login Router */
-UserRouter.post('/login', Login)
+//UserRouter.post('/login', Login)
 
 
 /** Sending OTP to Reset Password */
-UserRouter.put('/otpforResetPassword', updateVerify)
+//UserRouter.put('/otpforResetPassword', updateVerify)
 
 /** To Reset Password */
-UserRouter.put('/resetPassword', ResetPassword)
+//UserRouter.put('/resetPassword', ResetPassword)
 
 
 /** To Get All News */
@@ -70,4 +70,5 @@ UserRouter.delete('/delete', deleteNews)
 
 /** To Update News */
 UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
+
 module.exports = { UserRouter } 
