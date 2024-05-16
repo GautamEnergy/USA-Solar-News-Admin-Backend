@@ -167,7 +167,7 @@ app.use('/admin',UserRouter)
 app.listen(process.env.PORT, async()=>{
   try{
    await connect
-    console.log(`App is running on PORT ${process.env.PORT}, ${{process.env.MongoURL}`);
+    console.log(`App is running on PORT ${process.env.PORT}, ${process.env.MongoURL}`);
   }catch(err){
 console.log(err)
   }
