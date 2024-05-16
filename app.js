@@ -8,7 +8,7 @@ const url = require('url');
 const app = express()
 app.use(express.json())
 app.use(cors())
-
+require('dotenv').config()
 app.use(bodyParser.json());
 function extractWebsiteName(domain) {
   const domainParts = domain.split('.');
@@ -167,7 +167,7 @@ app.use('/admin',UserRouter)
 app.listen(process.env.PORT, async()=>{
   try{
    await connect
-     console.log('Everything is running perfect')
+    console.log(`App is running on PORT ${process.env.PORT}`);
   }catch(err){
 console.log(err)
   }
