@@ -76,7 +76,7 @@ const create = async (req, res) => {
         Body:Body
        })
       /** Send success response with the file URL */
-      res.send({ msg: 'Data inserted successfully!',ImageURL: `http://localhost:9090/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+      res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
         } catch (err) {
           console.log(err);
           res.status(401).send(err);
