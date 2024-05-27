@@ -71,7 +71,7 @@ const create = async (req, res) => {
         /** Saving Data in Database as Collection */
     let insertedData =    await News.insertMany({
         UUID:UUID,
-        ImageURL: `http://localhost:9090/admin/blogImage/${UUID}${req.file.originalname}`,
+        ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
         Header:Header,
         Body:Body
        })
