@@ -72,6 +72,7 @@ const create = async (req, res) => {
     let insertedData =    await News.insertMany({
         UUID:UUID,
         ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
+        
         Header:Header,
         Body:Body
        })
