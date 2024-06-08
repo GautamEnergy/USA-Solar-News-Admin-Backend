@@ -9,6 +9,10 @@ const NewsSchema = mongoose.Schema({
         required: true,
         trim: true, // Trim whitespac
     },
+    Tags:{
+        type: String,
+         required: false
+    },
     Header: {
         type: String,
         required: true

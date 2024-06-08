@@ -45,7 +45,7 @@ require('dotenv').config()
 const create = async (req, res) => {
 
      const UUID = uuidv4();
-    const { Header, Body } = req.body;
+    const { Header, Body,tags } = req.body;
     if(req.file.size){
         /** making file in IPQC-Pdf-Folder*/
         try {
@@ -72,9 +72,9 @@ const create = async (req, res) => {
     let insertedData =    await News.insertMany({
         UUID:UUID,
         ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
-        
         Header:Header,
-        Body:Body
+        Body:Body,
+        Tags:tags
        })
       /** Send success response with the file URL */
       res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
@@ -395,7 +395,8 @@ const getNews = async (req, res) => {
         if (total[0]["totalPages"] < Number(Page)) {
             res.status(404).send({ msg: `there is no ${Page} Page` })
         } else {
-            let data = await News.aggregate([{ $skip: (Number(Page) - 1) * Number(NoOfNews) }, { $limit: Number(NoOfNews) }])
+    
+            let data = await News.aggregate([{ $skip: (Number(Page) - 1) * Number(NoOfNews) }, { $limit: Number(NoOfNews) },{$sort:{CreatedOn:-1}}])
             console.log(data.length)
             res.send({ data })
         }
