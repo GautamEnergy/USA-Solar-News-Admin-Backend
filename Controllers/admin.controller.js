@@ -46,7 +46,7 @@ const create = async (req, res) => {
 
      const UUID = uuidv4();
     const { Header, Body,tags } = req.body;
-    console.log(tags)
+    console.log(req.body)
     if(req.file.size){
         /** making file in IPQC-Pdf-Folder*/
         try {
