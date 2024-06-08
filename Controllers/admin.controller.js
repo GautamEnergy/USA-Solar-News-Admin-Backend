@@ -397,7 +397,7 @@ const getNews = async (req, res) => {
             res.status(404).send({ msg: `there is no ${Page} Page` })
         } else {
     
-            let data = await News.aggregate([{ $skip: (Number(Page) - 1) * Number(NoOfNews) }, { $limit: Number(NoOfNews) },{$sort:{CreatedOn:-1}}])
+            let data = await News.aggregate([{$sort:{CreatedOn:-1}},{ $skip: (Number(Page) - 1) * Number(NoOfNews) }, { $limit: Number(NoOfNews) }])
             console.log(data.length)
             res.send({ data })
         }
