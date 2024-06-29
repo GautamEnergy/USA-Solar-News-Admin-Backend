@@ -65,7 +65,7 @@ app.post("/submit-contactus", async (req, res) => {
     </div>
       `,
     };
-    //await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     res.status(200).json({ success: true, message: "Form submitted successfully" });
   } catch (error) {
@@ -103,7 +103,7 @@ app.post("/submit-contactbox", async (req, res) => {
       `,
     };
 
-    //await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     res.status(200).json({ success: true, message: "Form submitted successfully" });
   } catch (error) {
@@ -139,7 +139,7 @@ app.post("/submit-solarplant", async (req, res) => {
       `,
     };
 
-    //await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     res.status(200).json({ success: true, message: "Form submitted successfully" });
   } catch (error) {
