@@ -43,59 +43,40 @@ require('dotenv').config()
 /** ################################################################### */
 
 const create = async (req, res) => {
+    const UUID = uuidv4();
+    const { Header, Body, tags } = req.body;
 
-     const UUID = uuidv4();
-    const { Header, Body,tags } = req.body;
-    console.log(req.body)
-    if(req.file.size){
-        /** making file in IPQC-Pdf-Folder*/
+    if (req.file && req.file.size) {
         try {
-           /** Get the file buffer and the file format **/
-           const fileBuffer = req.file.buffer;
-          
-           /** Define the folder path **/
-           const folderPath = Path.join('Blog_Images');
-      
-           /** Create the folder if it doesn't exist **/
-           if (!fs.existsSync(folderPath)) {
-            console.log(folderPath)
-               fs.mkdirSync(folderPath, { recursive: true });
-           }
-           
-           /** Define the file path, including the desired file name and format */
-           const fileName = `${UUID}${req.file.originalname}`;
-           const filePath = Path.join(folderPath, fileName);
-      
-           /** Save the file buffer to the specified file path */
-        fs.writeFileSync(filePath, fileBuffer);
-      
-        /** Saving Data in Database as Collection */
-    let insertedData =    await News.insertMany({
-        UUID:UUID,
-        ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
-        Header:Header,
-        Body:Body,
-        Tags:tags
-       })
-      /** Send success response with the file URL */
-      res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+            const fileBuffer = req.file.buffer;
+            const folderPath = Path.join('Blog_Images');
+            if (!fs.existsSync(folderPath)) {
+                console.log(folderPath)
+                fs.mkdirSync(folderPath, { recursive: true });
+            }
+            const fileName = `${UUID}${req.file.originalname}`;
+            const filePath = Path.join(folderPath, fileName);
+            fs.writeFileSync(filePath, fileBuffer);
+
+            let parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+
+            let insertedData = await News.insertMany({
+                UUID: UUID,
+                ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
+                Header: Header,
+                Body: Body,
+                Tags: parsedTags
+            });
+
+            res.send({ msg: 'Data inserted successfully!', ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`, insertedData });
         } catch (err) {
-          console.log(err);
-          res.status(401).send(err);
+            console.log(err);
+            res.status(401).send(err);
         }
-      }else{
-        res.status(401).send({status:false,'err':'file is empty'})
-      }
-
-  
-
-    /**************************** Utilits for Frontend *****************/
-    // function formatDate(date) {
-    //     const options = { day: '2-digit', month: 'short', year: 'numeric' };
-    //     return date.toLocaleDateString('en-GB', options);
-    // }
+    } else {
+        res.status(401).send({ status: false, 'err': 'file is empty' });
+    }
 }
-
 /** Get Blog Image */
 const GetBlogImage = async(req,res)=>{
     const filename = req.params.filename;
