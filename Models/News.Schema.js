@@ -1,14 +1,4 @@
 const mongoose = require('mongoose')
-const TagSchema = mongoose.Schema({
-    tag: {
-        type: String,
-        required: true
-    },
-    link: {
-        type: String,
-        required: true
-    }
-}, { _id: false });
 const NewsSchema = mongoose.Schema({
     UUID:{
       type:String,
@@ -19,7 +9,10 @@ const NewsSchema = mongoose.Schema({
         required: true,
         trim: true, // Trim whitespac
     },
-    Tags: [TagSchema],
+    Tags:{
+        type: String,
+         required: false
+    },
     Header: {
         type: String,
         required: true
