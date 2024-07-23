@@ -63,7 +63,7 @@ UserRouter.get('/blogImage/:filename',GetBlogImage)
 // UserRouter.use(authentication)
 
 /** To Create News */
-UserRouter.post('/createNews', upload.single('BlogImage'), create)
+UserRouter.post('/createNews', upload.single('BlogImage'),authentication, create)
 
 /** To Delete News  */
 UserRouter.delete('/delete', deleteNews)
