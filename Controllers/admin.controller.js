@@ -45,20 +45,24 @@ require('dotenv').config()
 const create = async (req, res) => {
     const UUID = uuidv4();
     const { Header, Body, tags } = req.body;
+    let parsedTags = [];
 
-    if (req.file && req.file.size) {
+    try {
+        parsedTags = JSON.parse(tags);
+    } catch (e) {
+        return res.status(400).send({ status: false, err: 'Invalid tags format' });
+    }
+
+    if (req.file.size) {
         try {
             const fileBuffer = req.file.buffer;
             const folderPath = Path.join('Blog_Images');
             if (!fs.existsSync(folderPath)) {
-                console.log(folderPath)
                 fs.mkdirSync(folderPath, { recursive: true });
             }
             const fileName = `${UUID}${req.file.originalname}`;
             const filePath = Path.join(folderPath, fileName);
             fs.writeFileSync(filePath, fileBuffer);
-
-            let parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
 
             let insertedData = await News.insertMany({
                 UUID: UUID,
@@ -68,7 +72,11 @@ const create = async (req, res) => {
                 Tags: parsedTags
             });
 
-            res.send({ msg: 'Data inserted successfully!', ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`, insertedData });
+            res.send({
+                msg: 'Data inserted successfully!',
+                ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
+                insertedData
+            });
         } catch (err) {
             console.log(err);
             res.status(401).send(err);
@@ -76,7 +84,8 @@ const create = async (req, res) => {
     } else {
         res.status(401).send({ status: false, 'err': 'file is empty' });
     }
-}
+};
+
 /** Get Blog Image */
 const GetBlogImage = async(req,res)=>{
     const filename = req.params.filename;
