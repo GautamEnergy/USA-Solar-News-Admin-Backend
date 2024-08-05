@@ -147,6 +147,40 @@ app.post("/submit-solarplant", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+app.post("/submit-pmkusum", async (req, res) => {
+  try {
+    const formData = req.body;
+    const referrerUrl = req.headers.referer || "Unknown"; // Get the referrer URL
+    const referrerDomain = url.parse(referrerUrl).hostname; // Extract the domain name from the URL
+    const referrerWebsite = extractWebsiteName(referrerDomain); // Extract the website name from the domain name
+
+    // ... (Any additional validation or processing for Contact Box form data)
+
+    const mailOptions = {
+      from: "gautamsolar.vidoes01@gmail.com",  // sender email
+      to: "info@gautamsolar.com",  // another destination email
+      subject: "PM Kusum Yojna Form Submission",
+      html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+      <h2 style="color: #a20000;">solar plant Box Form Submission</h2>
+      <p style="margin-bottom: 10px;"><strong>Name:</strong> ${formData.name}</p>
+      <p style="margin-bottom: 10px;"><strong>Mobile No:</strong> ${formData.phone}</p>
+      <p style="margin-bottom: 10px;"><strong>Company Name:</strong> ${formData.city}</p>
+      <p style="margin-bottom: 10px;"><strong>Wants to put up:</strong> ${formData.projectSize}</p>
+      <p style="margin-bottom: 10px;"><strong>Project Size:</strong> ${formData.selectedOption}</p>
+      <p style="margin-bottom: 10px;"><strong>Source:</strong> ${referrerWebsite}</p>
+    </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ success: true, message: "Form submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting PM-Kusum Yojna Form:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
 
 
 app.get('/',(req,res)=>{
