@@ -181,9 +181,46 @@ app.post("/submit-pmkusum", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+app.post("/submit-delhi", async (req, res) => {
+  try {
+    const formData = req.body;
+    const referrerUrl = req.headers.referer || "Unknown"; // Get the referrer URL
+    const referrerDomain = url.parse(referrerUrl).hostname; // Extract the domain name from the URL
+    const referrerWebsite = extractWebsiteName(referrerDomain); // Extract the website name from the domain name
+
+    // ... (Any additional validation or processing for Contact Box form data)
+
+    const mailOptions = {
+      from: "gautamsolar.vidoes01@gmail.com",  // sender email
+      to: "info@galo.co.in",  // another destination email
+      subject: "Delhi Contact Form Submission",
+      html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+      <h2 style="color: #a20000;">solar plant Box Form Submission</h2>
+      <p style="margin-bottom: 10px;"><strong>Name:</strong> ${formData.Name}</p>
+      <p style="margin-bottom: 10px;"><strong>Mobile No:</strong> ${formData.Phone}</p>
+      <p style="margin-bottom: 10px;"><strong>Oin Code:</strong> ${formData.Pincode}</p>
+      <p style="margin-bottom: 10px;"><strong>City:</strong> ${formData.City}</p>
+      <p style="margin-bottom: 10px;"><strong>Solar For:</strong> ${formData.SolarFor}</p>
+      <p style="margin-bottom: 10px;"><strong>Remark:</strong> ${formData.Remark}</p>
+      <p style="margin-bottom: 10px;"><strong>DateTime:</strong> ${formData.DateTime}</p>
+      <p style="margin-bottom: 10px;"><strong>Source:</strong> ${referrerWebsite}</p>
+    </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ success: true, message: "Form submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting Delhi Contact Form:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
 
 
 app.get('/',(req,res)=>{
+  
   res.send({msg:"Welcome Solar News App"})
 })
 
