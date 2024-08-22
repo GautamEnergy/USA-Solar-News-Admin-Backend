@@ -196,14 +196,14 @@ app.post("/submit-delhi", async (req, res) => {
       subject: "Delhi Contact Form Submission",
       html: `
       <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-      <h2 style="color: #a20000;">solar plant Box Form Submission</h2>
+      <h2 style="color: #a20000;">Delhi Galo Solar Form Submission</h2>
       <p style="margin-bottom: 10px;"><strong>Name:</strong> ${formData.Name}</p>
       <p style="margin-bottom: 10px;"><strong>Mobile No:</strong> ${formData.Phone}</p>
       <p style="margin-bottom: 10px;"><strong>Oin Code:</strong> ${formData.Pincode}</p>
       <p style="margin-bottom: 10px;"><strong>City:</strong> ${formData.City}</p>
       <p style="margin-bottom: 10px;"><strong>Solar For:</strong> ${formData.SolarFor}</p>
       <p style="margin-bottom: 10px;"><strong>Remark:</strong> ${formData.Remark}</p>
-      <p style="margin-bottom: 10px;"><strong>DateTime:</strong> ${formData.DateTime}</p>
+     
       <p style="margin-bottom: 10px;"><strong>Source:</strong> ${referrerWebsite}</p>
     </div>
       `,
@@ -220,7 +220,7 @@ app.post("/submit-delhi", async (req, res) => {
 
 
 app.get('/',(req,res)=>{
-  
+
   res.send({msg:"Welcome Solar News App"})
 })
 
