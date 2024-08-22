@@ -32,6 +32,16 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized:false
   }
 });
+const transporter1 = nodemailer.createTransport({
+  service:"gmail",
+   auth: {
+     user: 'galoenergy55@gmail.com', // Replace with your SMTP username
+     pass: 'weqskxtfzscaddar', // Replace with your SMTP password or app-specific password
+   },
+   tls:{
+     rejectUnauthorized:false
+   }
+ })
 
 // Route to handle form submission
 app.post("/submit-contactus", async (req, res) => {
@@ -191,7 +201,7 @@ app.post("/submit-delhi", async (req, res) => {
     // ... (Any additional validation or processing for Contact Box form data)
 
     const mailOptions = {
-      from: "gautamsolar.vidoes01@gmail.com",  // sender email
+      from: "galoenergy55@gmail.com",  // sender email
       to: "info@galo.co.in",  // another destination email
       subject: "Galo Form Submission",
       html: `
@@ -211,7 +221,7 @@ app.post("/submit-delhi", async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await transporter1.sendMail(mailOptions);
 
     res.status(200).json({ success: true, message: "Form submitted successfully" });
   } catch (error) {
