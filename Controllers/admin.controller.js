@@ -45,7 +45,7 @@ require('dotenv').config()
 const create = async (req, res) => {
 
      const UUID = uuidv4();
-    const { Header, Body,tags } = req.body;
+    const { Header,Description, Body,tags } = req.body;
     console.log(req.body)
     if(req.file.size){
         /** making file in IPQC-Pdf-Folder*/
@@ -74,6 +74,7 @@ const create = async (req, res) => {
         UUID:UUID,
         ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
         Header:Header,
+        Description:Description,
         Body:Body,
         Tags:tags
        })

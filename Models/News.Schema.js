@@ -17,6 +17,10 @@ const NewsSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    Description: {
+        type: String,
+        required: true
+    },
     Body: {
         type: String,
         required: true
@@ -24,7 +28,7 @@ const NewsSchema = mongoose.Schema({
     CreatedOn: {
         type: Date,
         default: Date.now, 
-        immutable: true 
+        immutable: true                                                                                                          
     },
     UpdatedOn: {
         type: Date,
