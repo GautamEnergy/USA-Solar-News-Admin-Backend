@@ -480,7 +480,7 @@ const UpdateNews = async (req, res) => {
     }
 };
 const getNewsByUUID = async (req, res) => {
-    const { uuid } = req.query;
+    const { uuid } = req.body;
 
     try {
         // Find the document by its UUID
