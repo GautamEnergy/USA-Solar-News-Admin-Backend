@@ -440,25 +440,65 @@ const deleteNews = async (req, res) => {
 
 
 const UpdateNews = async (req, res) => {
+    const { uuid } = req.query;
+    const updates = req.body;
 
-    const { _id, uuid } = req.query
+    try {
+        // Check if a new file is uploaded
+        if (req.file) {
+            const UUID = uuidv4(); // Generate a new unique ID if a new image is uploaded
+            const fileBuffer = req.file.buffer;
+            const folderPath = Path.join('Blog_Images');
 
-    if (req.body.FileFormat) {
+            // Create folder if it doesn't exist
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath, { recursive: true });
+            }
 
-        
-       
-        
-    } else {
-        try {
-            await News.updateOne({ UUID:uuid }, req.body)
-            res.send({ msg: 'updated Succesfully' })
-        } catch (err) {
-            res.send({ msg: err })
+            // Define new image file name and path
+            const fileName = `${UUID}${req.file.originalname}`;
+            const filePath = Path.join(folderPath, fileName);
+
+            // Save the new image file
+            fs.writeFileSync(filePath, fileBuffer);
+
+            // Add the new image URL to the updates object
+            updates.ImageURL = `https://gautamsolar.us/admin/blogImage/${fileName}`;
         }
+
+        // Update document in the News collection
+        const updatedDocument = await News.findOneAndUpdate({ UUID: uuid }, updates, { new: true });
+        
+        if (!updatedDocument) {
+            return res.status(404).json({ message: "Document not found." });
+        }
+
+        res.status(200).json({ message: "News updated successfully", updatedDocument });
+    } catch (error) {
+        console.error("Error updating document:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
+};
+const getNewsByUUID = async (req, res) => {
+    const { uuid } = req.query;
 
-}
+    try {
+        // Find the document by its UUID
+        const newsItem = await News.findOne({ UUID: uuid });
+
+        // If no document is found, return a 404 error
+        if (!newsItem) {
+            return res.status(404).json({ message: "News item not found." });
+        }
+
+        // Send the found document as the response
+        res.status(200).json({ message: "News item fetched successfully", data: newsItem });
+    } catch (error) {
+        console.error("Error fetching news item:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 
 
-module.exports = {  create, getNews, deleteNews, UpdateNews, GetBlogImage }
+module.exports = {  create, getNews, deleteNews, UpdateNews, GetBlogImage,getNewsByUUID }

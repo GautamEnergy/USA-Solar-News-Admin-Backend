@@ -1,5 +1,5 @@
 const express = require('express')
-const { create, getNews,deleteNews, UpdateNews, GetBlogImage } = require('../Controllers/admin.controller')
+const { create, getNews,deleteNews, UpdateNews, GetBlogImage,getNewsByUUID } = require('../Controllers/admin.controller')
 const multer = require('multer')
 const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
@@ -67,6 +67,8 @@ UserRouter.post('/createNews', upload.single('BlogImage'), create)
 
 /** To Delete News  */
 UserRouter.delete('/delete', deleteNews)
+UserRouter.get('/news/edit', getNewsByUUID);
+
 
 /** To Update News */
 UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
