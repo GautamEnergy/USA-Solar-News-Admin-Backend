@@ -41,61 +41,120 @@ require('dotenv').config()
 
 
 /** ################################################################### */
-
 const create = async (req, res) => {
+    const UUID = req.body.UUID || uuidv4(); // Use provided UUID or generate a new one
+    const { Header, Description, Body, tags } = req.body;
+    console.log(req.body);
 
-     const UUID = uuidv4();
-    const { Header,Description, Body,tags } = req.body;
-    console.log(req.body)
-    if(req.file.size){
-        /** making file in IPQC-Pdf-Folder*/
+    if (req.file && req.file.size) {
+        /** making file in Blog_Images folder */
         try {
-           /** Get the file buffer and the file format **/
-           const fileBuffer = req.file.buffer;
+            /** Get the file buffer and the file format **/
+            const fileBuffer = req.file.buffer;
           
-           /** Define the folder path **/
-           const folderPath = Path.join('Blog_Images');
+            /** Define the folder path **/
+            const folderPath = Path.join('Blog_Images');
       
-           /** Create the folder if it doesn't exist **/
-           if (!fs.existsSync(folderPath)) {
-            console.log(folderPath)
-               fs.mkdirSync(folderPath, { recursive: true });
-           }
+            /** Create the folder if it doesn't exist **/
+            if (!fs.existsSync(folderPath)) {
+                console.log(folderPath);
+                fs.mkdirSync(folderPath, { recursive: true });
+            }
            
-           /** Define the file path, including the desired file name and format */
-           const fileName = `${UUID}${req.file.originalname}`;
-           const filePath = Path.join(folderPath, fileName);
+            /** Define the file path, including the desired file name and format */
+            const fileName = `${UUID}${req.file.originalname}`;
+            const filePath = Path.join(folderPath, fileName);
       
-           /** Save the file buffer to the specified file path */
-        fs.writeFileSync(filePath, fileBuffer);
-      
-        /** Saving Data in Database as Collection */
-    let insertedData =    await News.insertMany({
-        UUID:UUID,
-        ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
-        Header:Header,
-        Description:Description,
-        Body:Body,
-        Tags:tags
-       })
-      /** Send success response with the file URL */
-      res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+            /** Save the file buffer to the specified file path */
+            fs.writeFileSync(filePath, fileBuffer);
+
+            /** Prepare data for insertion or update */
+            const data = {
+                UUID: UUID,
+                ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
+                Header: Header,
+                Description: Description,
+                Body: Body,
+                Tags: tags
+            };
+
+            /** Check if document with UUID exists */
+            const existingDocument = await News.findOne({ UUID });
+
+            if (existingDocument) {
+                // Update the existing document
+                await News.updateOne({ UUID }, { $set: data });
+                res.send({ msg: 'Data updated successfully!', ImageURL: data.ImageURL });
+            } else {
+                // Insert a new document
+                let insertedData = await News.insertMany(data);
+                res.send({ msg: 'Data inserted successfully!', ImageURL: data.ImageURL, insertedData });
+            }
+
         } catch (err) {
-          console.log(err);
-          res.status(401).send(err);
+            console.log(err);
+            res.status(401).send(err);
         }
-      }else{
-        res.status(401).send({status:false,'err':'file is empty'})
-      }
+    } else {
+        res.status(401).send({ status: false, 'err': 'file is empty' });
+    }
+};
+
+
+// const create = async (req, res) => {
+
+//      const UUID = uuidv4();
+//     const { Header,Description, Body,tags } = req.body;
+//     console.log(req.body)
+//     if(req.file.size){
+//         /** making file in IPQC-Pdf-Folder*/
+//         try {
+//            /** Get the file buffer and the file format **/
+//            const fileBuffer = req.file.buffer;
+          
+//            /** Define the folder path **/
+//            const folderPath = Path.join('Blog_Images');
+      
+//            /** Create the folder if it doesn't exist **/
+//            if (!fs.existsSync(folderPath)) {
+//             console.log(folderPath)
+//                fs.mkdirSync(folderPath, { recursive: true });
+//            }
+           
+//            /** Define the file path, including the desired file name and format */
+//            const fileName = `${UUID}${req.file.originalname}`;
+//            const filePath = Path.join(folderPath, fileName);
+      
+//            /** Save the file buffer to the specified file path */
+//         fs.writeFileSync(filePath, fileBuffer);
+      
+//         /** Saving Data in Database as Collection */
+//     let insertedData =    await News.insertMany({
+//         UUID:UUID,
+//         ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
+//         Header:Header,
+//         Description:Description,
+//         Body:Body,
+//         Tags:tags
+//        })
+//       /** Send success response with the file URL */
+//       res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
+//         } catch (err) {
+//           console.log(err);
+//           res.status(401).send(err);
+//         }
+//       }else{
+//         res.status(401).send({status:false,'err':'file is empty'})
+//       }
 
   
 
-    /**************************** Utilits for Frontend *****************/
-    // function formatDate(date) {
-    //     const options = { day: '2-digit', month: 'short', year: 'numeric' };
-    //     return date.toLocaleDateString('en-GB', options);
-    // }
-}
+//     /**************************** Utilits for Frontend *****************/
+//     // function formatDate(date) {
+//     //     const options = { day: '2-digit', month: 'short', year: 'numeric' };
+//     //     return date.toLocaleDateString('en-GB', options);
+//     // }
+// }
 
 /** Get Blog Image */
 const GetBlogImage = async(req,res)=>{
