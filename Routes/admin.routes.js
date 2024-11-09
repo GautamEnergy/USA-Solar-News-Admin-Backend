@@ -67,7 +67,7 @@ UserRouter.post('/createNews', upload.single('BlogImage'), create)
 
 /** To Delete News  */
 UserRouter.delete('/delete', deleteNews)
-UserRouter.get('/news/edit', getNewsByUUID);
+UserRouter.post('/news/edit', getNewsByUUID);
 
 
 /** To Update News */
