@@ -11,33 +11,40 @@ require('dotenv').config()
 
 
 
+const generateSitemap = async () => {
+    try {
+        const blogs = await News.find();
+        const sitemapLinks = blogs.map(blog => ({
+            url: `/${createSlug(blog.Header)}`,
+            lastmod: new Date(blog.CreatedOn).toISOString().split('T')[0]  // format YYYY-MM-DD
+        }));
 
-/*** Nodemailer-configuration */
-// let otp = {}
-// let verifyEmail;
-// let verifypassword;
+        const { SitemapStream, streamToPromise } = require('sitemap');
+        const { Readable } = require('stream');
+        
+        const stream = new SitemapStream({ hostname: 'https://gautamsolar.com' });
 
-// let transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//         user: process.env.Email,
-//         pass: process.env.passKey
-//     },
-//     tls: {
-//         rejectUnauthorized: false,
-//     }
-// })
+        // Generate the sitemap XML and save it to a file
+        const xmlData = await streamToPromise(Readable.from(sitemapLinks).pipe(stream));
+        fs.writeFileSync(Path.join(__dirname, 'sitemap.xml'), xmlData);
+        console.log('Sitemap generated and saved');
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+    }
+};
 
-// function generateOtp() {
+// Function to create URL slugs
+const createSlug = (header) => {
+    return header
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-')         // Replace spaces with hyphens
+        .replace(/-+/g, '-')          // Remove consecutive hyphens
+        .trim();
+};
 
-//     let OTP = Math.floor(Math.random() * (1000 - 1 + 1) + 7000)
 
-//     let onetime = OTP
 
-//     otp.OneTimePassword = onetime
-
-//     return OTP
-// }
 
 
 /** ################################################################### */
@@ -91,6 +98,8 @@ const create = async (req, res) => {
                 res.send({ msg: 'Data inserted successfully!', ImageURL: data.ImageURL, insertedData });
             }
 
+            await generateSitemap();
+
         } catch (err) {
             console.log(err);
             res.status(401).send(err);
@@ -101,60 +110,7 @@ const create = async (req, res) => {
 };
 
 
-// const create = async (req, res) => {
 
-//      const UUID = uuidv4();
-//     const { Header,Description, Body,tags } = req.body;
-//     console.log(req.body)
-//     if(req.file.size){
-//         /** making file in IPQC-Pdf-Folder*/
-//         try {
-//            /** Get the file buffer and the file format **/
-//            const fileBuffer = req.file.buffer;
-          
-//            /** Define the folder path **/
-//            const folderPath = Path.join('Blog_Images');
-      
-//            /** Create the folder if it doesn't exist **/
-//            if (!fs.existsSync(folderPath)) {
-//             console.log(folderPath)
-//                fs.mkdirSync(folderPath, { recursive: true });
-//            }
-           
-//            /** Define the file path, including the desired file name and format */
-//            const fileName = `${UUID}${req.file.originalname}`;
-//            const filePath = Path.join(folderPath, fileName);
-      
-//            /** Save the file buffer to the specified file path */
-//         fs.writeFileSync(filePath, fileBuffer);
-      
-//         /** Saving Data in Database as Collection */
-//     let insertedData =    await News.insertMany({
-//         UUID:UUID,
-//         ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
-//         Header:Header,
-//         Description:Description,
-//         Body:Body,
-//         Tags:tags
-//        })
-//       /** Send success response with the file URL */
-//       res.send({ msg: 'Data inserted successfully!',ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,insertedData });
-//         } catch (err) {
-//           console.log(err);
-//           res.status(401).send(err);
-//         }
-//       }else{
-//         res.status(401).send({status:false,'err':'file is empty'})
-//       }
-
-  
-
-//     /**************************** Utilits for Frontend *****************/
-//     // function formatDate(date) {
-//     //     const options = { day: '2-digit', month: 'short', year: 'numeric' };
-//     //     return date.toLocaleDateString('en-GB', options);
-//     // }
-// }
 
 /** Get Blog Image */
 const GetBlogImage = async(req,res)=>{
@@ -176,272 +132,6 @@ const GetBlogImage = async(req,res)=>{
 
 /** ################################################################### */
 
-// const OTPforSignUp = async (req, res) => {
-
-//     const { Email, Password } = req.body
-
-//     let users = await User.find({ Email })
-
-
-//     if (users.length && Email != "krishukumar535@gmail.com") {
-
-//         res.status(400).send({ "message": "You are already exist User or You don't have access of it" })
-
-//     } else {
-
-//         let mailOptions = {
-//             from: "bluearpon4567@gmail.com",
-//             to: Email,
-//             subject: "One Time Verification(OTP)",
-//             html: `<body>
-//             <div style="font-family: Arial, sans-serif; font-size: 14px; color: #000000;">
-//               <p>Dear, Admin</p>
-//               <p> I hope this email finds you well. As per your request, please find below your one-time password (OTP) to verify your identity and ensure the security of your account:</p>
-//               <p> <strong style="color: #ff0000;">${generateOtp()}</strong></p>
-//               <p>Please note that this OTP is valid for a limited time only, so we advise that you use it as soon as possible. If you have any questions or concerns regarding this OTP, please do not hesitate to contact us.</p>
-//               <p>Thank you for your trust in our services and for helping us maintain the security of your account.</p>
-//               <p>Best regards,</p>
-//               <p>The Verification Team</p>
-//             </div>
-//           </body>`
-
-
-
-//         }
-
-//         transporter.sendMail(mailOptions, async (err, success) => {
-
-//             if (err) {
-
-//                 res.status(400).send({ message: "Email is wrong" })
-
-//             } else {
-
-//                 console.log(otp.OneTimePassword)
-
-//                 res.status(200).send({ "message": "OTP has Sent Succesfully!!" })
-
-//                 verifyEmail = Email
-
-//                 verifypassword = Password
-
-
-
-
-
-//             }
-//         })
-//     }
-// }
-
-
-/** ################################################################### */
-// const Signup = async (req, res) => {
-
-
-
-
-//     let { OTP } = req.body
-
-
-
-//     if (Number(OTP) == otp.OneTimePassword && verifyEmail !== undefined && verifypassword !== undefined) {
-//         try {
-
-//             bcrypt.hash(verifypassword, 8, async (err, hash) => {
-
-//                 let user = new User({ Email: verifyEmail, Password: hash })
-
-//                 await user.save()
-
-//                 const token = JWT.sign(process.env.JWT_KEY)
-
-//                 res.send({ "message": "User Registered!!", token: token })
-
-//             })
-
-//         } catch (err) {
-//             console.log(err)
-//             res.status(400).send({ "message": err })
-//         }
-
-//     } else {
-
-//         res.status(400).send({ "message": "OTP is Wrong, Please try again" })
-
-//     }
-// }
-
-/** ################################################################### */
-// const Login = async (req, res) => {
-
-//     let { Email, Password } = req.body
-
-
-
-//     let user = await User.findOne({ Email })
-
-//     if (user) {
-
-
-
-//         try {
-//             bcrypt.compare(Password, user.Password, function (err, result) {
-
-//                 if (result) {
-
-//                     const token = JWT.sign(process.env.JWT_KEY)
-
-//                     // console.log(token)
-
-//                     res.send({ message: "login Successfull!!", token: token })
-
-//                 } else {
-
-//                     res.status(404).send({ "message": "Wrong Crendtial!!" })
-
-//                 }
-//             });
-
-//         } catch (err) {
-
-//             res.status(400).send({ "message": "Wrong Crendtial!!" })
-
-//         }
-
-//     } else {
-//         res.status(404).send({ message: "User doesn't Exist" })
-//     }
-
-// }
-
-
-/** ################################################################### */
-/************************** OTP For Reset Password ***************************/
-// const updateVerify = async (req, res) => {
-
-//     let { Email, Password } = req.body
-
-//     let user = await User.find({ Email })
-
-//     //console.log(user)
-
-//     if (user.length !== 0) {
-
-//         let mailOptions = {
-
-//             from: "bluearpon4567@gmail.com",
-//             to: Email,
-//             subject: "Password Reset Request",
-
-//             html: `<body>
-//         <div style="font-family: Arial, sans-serif; font-size: 14px; color: #000000;">
-//           <p>Dear, Admin</p>
-//           <p> We have received a request to reset the password for your account. Please use the following One Time Password (OTP) to reset your password:</p>
-//           <p> OTP: <strong style="color: #ff0000;">${generateOtp()}</strong></p>
-//           <p>To reset your password, please follow the steps below:</p>
-//           <br>
-//           <p>1. Go to the login page on our website.</p>
-//           <p>2. Click on the "Forgot Password" link.</p>
-//           <p>3. Enter your email address associated with your account.</p>
-//           <p>4. Enter the OTP provided in this email.</p>
-//           <p>5. Create a new password for your account.</p>
-
-//           <p>Please note that this OTP is valid for one-time use only and will expire in 10 minutes. If you did not request this password reset, please ignore this email. </p>
-//           <p>If you have any questions or need further assistance, please contact our support team at <a href="mailto:">Support@team</a>.</p>
-//           <p>Best regards,</p>
-//           <p>The Verification Team</p>
-//         </div>
-//       </body>`
-
-//         }
-
-//         transporter.sendMail(mailOptions, async (err, success) => {
-
-//             if (err) {
-
-//                 res.status(404).send({ "message": "Email is wrong" })
-
-//             } else {
-
-
-//                 verifyEmail = Email
-
-//                 verifypassword = Password
-
-
-
-//                 res.send({ "message": "OTP has sent" })
-//             }
-//         })
-
-//     } else {
-
-//         res.status(404).send({ "message": "We have no data about Your email, Please First register" })
-//     }
-
-// }
-
-
-/** ################################################################### */
-/*************************************   Reset Password  ************************** */
-// const ResetPassword = async (req, res) => {
-
-//     let { OTP } = req.body
-
-
-
-//     if (Number(OTP) == otp.OneTimePassword && verifyEmail !== undefined && verifypassword !== undefined) {
-//         try {
-
-//             bcrypt.hash(verifypassword, 8, async (err, hash) => {
-
-//                 await User.updateOne({ Email: verifyEmail }, { Password: hash })
-
-//                 let mailOptions = {
-
-//                     from: "bluearpon4567@gmail.com",
-//                     to: verifyEmail,
-//                     subject: "Your Password Has Been Updated Successfully",
-//                     html: `<body>
-//                 <div style="font-family: Arial, sans-serif; font-size: 17px; color: #000000;">
-//                   <p>Dear, Admin</p>
-//                   <p>I am writing to inform you that your password has been updated successfully. As part of our ongoing commitment to security, we encourage our clients to change their passwords regularly, and we are pleased to let you know that this update has been completed successfully.</p>
-//                   <p>Your new password is: <strong style="color:red;">${verifypassword}</strong>. Please ensure that you keep this password safe and secure. If you have any difficulties or concerns regarding your new password, please do not hesitate to get in touch with us and we will be happy to assist you.</p>
-//                   <p>We take the security of your account seriously and have implemented a number of measures to ensure that your information remains safe. We use advanced encryption technology to protect your data, and our team regularly monitors our systems to identify and prevent any potential security breaches.</p>
-//                   <p>Thank you for choosing us as your provider of Blue Apron. If you have any questions or feedback, please do not hesitate to get in touch with us.</p>
-//                   <p>Best regards,</p>
-//                   <p>The Verification Team</p>
-//                 </div>
-//               </body>`
-
-//                 }
-
-//                 transporter.sendMail(mailOptions, async (err, success) => {
-
-//                     if (err) {
-
-//                         res.status(404).send({ "message": "Email is wrong" })
-
-//                     }
-//                 })
-
-//                 res.send({ "message": "Details Updated" })
-
-//             })
-
-//         } catch (err) {
-
-//             res.send({ "message": err.message })
-//         }
-
-//     } else {
-
-//         res.status(400).send({ "message": "OTP is Wrong, Please try again" })
-
-//     }
-
-// }
 
 /** Delete News */
 const getNews = async (req, res) => {
@@ -533,6 +223,9 @@ const UpdateNews = async (req, res) => {
         }
 
         res.status(200).json({ message: "News updated successfully", updatedDocument });
+
+
+        await generateSitemap();
     } catch (error) {
         console.error("Error updating document:", error);
         res.status(500).json({ message: "Internal server error" });
