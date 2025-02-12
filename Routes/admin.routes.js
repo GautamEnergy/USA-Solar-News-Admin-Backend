@@ -48,7 +48,7 @@ const fileFilter = (req, file, cb) => {
 
  
 // here we are uploading the images and video
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const upload = multer({ storage: storage, fileFilter: fileFilter,limits: { fileSize: 50 * 1024 * 1024 }  });
 
 
 /** To Get All News */
