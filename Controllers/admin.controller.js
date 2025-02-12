@@ -49,86 +49,165 @@ const createSlug = (header) => {
 
 /** ################################################################### */
 const create = async (req, res) => {
-    const UUID = req.body.UUID || uuidv4(); // Use provided UUID or generate a new one
-    const { Header, Description, Body, tags } = req.body;
-    console.log(req.body);
+    /** making file in Blog_Images folder */
+    try {
+        const UUID = req.body.UUID || uuidv4(); // Use provided UUID or generate a new one
+        const { Header, Description, Body, tags } = req.body;
+        // console.log(req.body);
+        console.log(req.files);
 
-    if (req.file && req.file.size) {
-        /** making file in Blog_Images folder */
-        try {
-            /** Get the file buffer and the file format **/
-            const fileBuffer = req.file.buffer;
-          
+
+        /** Get the file buffer and the file forma , because file is store in buffer data **/
+        const fileBuffer = req.files?.buffer;
+        // console.log(fileBuffer)
+
+        let videoFileName;
+        let imageFileName;
+        if (req.files?.BlogImage) {
             /** Define the folder path **/
             const folderPath = Path.join('Blog_Images');
-      
+
+
             /** Create the folder if it doesn't exist **/
             if (!fs.existsSync(folderPath)) {
                 console.log(folderPath);
                 fs.mkdirSync(folderPath, { recursive: true });
             }
-           
+
             /** Define the file path, including the desired file name and format */
-            const fileName = `${UUID}${req.file.originalname}`;
-            const filePath = Path.join(folderPath, fileName);
-      
+            imageFileName = `${req.files?.BlogImage[0]?.filename}`;
+            const filePath = Path.join(folderPath, imageFileName);
+
             /** Save the file buffer to the specified file path */
-            fs.writeFileSync(filePath, fileBuffer);
+            if (fileBuffer) {
+                fs.writeFileSync(filePath, fileBuffer);
+            }
+        }
 
-            /** Prepare data for insertion or update */
-            const data = {
-                UUID: UUID,
-                ImageURL: `https://gautamsolar.us/admin/blogImage/${UUID}${req.file.originalname}`,
-                Header: Header,
-                Description: Description,
-                Body: Body,
-                Tags: tags
-            };
 
-            /** Check if document with UUID exists */
-            const existingDocument = await News.findOne({ UUID });
-
-            if (existingDocument) {
-                // Update the existing document
-                await News.updateOne({ UUID }, { $set: data });
-                res.send({ msg: 'Data updated successfully!', ImageURL: data.ImageURL });
-            } else {
-                // Insert a new document
-                let insertedData = await News.insertMany(data);
-                res.send({ msg: 'Data inserted successfully!', ImageURL: data.ImageURL, insertedData });
+        // for checking we have video or not
+        if (req.files?.BlogVideo) {
+            // video folder
+            const folderPath1 = Path.join('Blog_Video');
+            /** Create the folder if it doesn't exist **/
+            if (!fs.existsSync(folderPath1)) {
+                console.log(folderPath1);
+                fs.mkdirSync(folderPath1, { recursive: true });
             }
 
-            await generateSitemap();
+            /** Define the file path, including the desired file name and format */
+            videoFileName = `${req.files?.BlogVideo[0]?.filename}`;
+            const filePath1 = Path.join(folderPath1, videoFileName);
 
-        } catch (err) {
-            console.log(err);
-            res.status(401).send(err);
+            /** Save the file buffer to the specified file path */
+            if (fileBuffer) {
+
+                fs.writeFileSync(filePath1, fileBuffer);
+            }
+
         }
-    } else {
-        res.status(401).send({ status: false, 'err': 'file is empty' });
+
+        const videofilePath = videoFileName ? `https://gautamsolar.us/admin/blogVideo/${videoFileName}` : null;
+
+        const imagefilePath = imageFileName ? `https://gautamsolar.us/admin/blogImage/${imageFileName}` : null;
+
+
+        /** Prepare data for insertion or update */
+        const data = {
+            UUID: UUID,
+            ImageURL: imagefilePath,
+            VideoUrl: videofilePath,
+            Header: Header,
+            Description: Description,
+            Body: Body,
+            Tags: tags
+        };
+
+        await generateSitemap();
+        /** Check if document with UUID exists */
+        const existingDocument = await News.findOne({ UUID });
+
+        if (existingDocument) {
+            // Update the existing document
+            await News.updateOne({ UUID }, { $set: data });
+
+            return res
+                .status(200)
+                .json({
+                    success: true,
+                    message: "Data inserted successfully!",
+                    data: {
+                        insertedData,
+                        ImageURL: data.ImageURL,
+                        VideoUrl: data.VideoUrl
+                    }
+                });
+        } else {
+            // Insert a new document
+            let insertedData = await News.insertMany(data);
+            return res
+                .status(200)
+                .json({
+                    success: true,
+                    message: "Data inserted successfully!",
+                    data: {
+                        insertedData,
+                        ImageURL: data.ImageURL,
+                        VideoUrl: data.VideoUrl
+                    }
+                });
+
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({
+            success: false,
+            message: "Something went wrong..",
+            error: err,
+        });
     }
+
 };
 
 
 
 
 /** Get Blog Image */
-const GetBlogImage = async(req,res)=>{
-    const filename = req.params.filename;
-     /** Define the absolute path to the IPQC-Pdf-Folder directory */
-     const pdfFolderPath = Path.resolve('Blog_Images');
-  
-     /** Construct the full file path to the requested file */
-     const filePath = Path.join(pdfFolderPath, filename);
-  
-     /** Send the file to the client */
-     res.sendFile(filePath, (err) => {
-         if (err) {
-             console.error('Error sending file:', err);
-             res.status(404).send({ error: 'File not found' });
-         }
-     });
-  }
+const GetBlogImage = async (req, res) => {
+    const filename = req.params?.filename;
+    /** Define the absolute path to the IPQC-Pdf-Folder directory */
+    const pdfFolderPath = Path.resolve('Blog_Images');
+
+    /** Construct the full file path to the requested file */
+    const filePath = Path.join(pdfFolderPath, filename);
+
+    if (fs.existsSync(filePath)) {
+       return res.sendFile(filePath);
+    } else {
+       return res.status(404).send({
+            success: false,
+            message: 'File not found',
+        });
+    }
+}
+//get blog Video
+const GetBlogVideo = (req, res) => {
+    const filename = req.params?.filename;
+    const pdfFolderPath = Path.resolve('Blog_Video');
+    const filePath = Path.join(pdfFolderPath, filename);
+    
+    if (fs.existsSync(filePath)) {
+       return res.sendFile(filePath);
+    } else {
+       return res.status(404).send({ 
+            success:false,
+            message: 'File not found',
+         });
+    }
+
+
+}
 
 /** ################################################################### */
 
@@ -138,7 +217,7 @@ const getNews = async (req, res) => {
     const { NoOfNews, Page } = req.query
 
     try {
-
+        // here News is a collection
         let total = await News.aggregate([{ $group: { _id: null, total: { $sum: 1 } } }, { $project: { _id: 0, total: 1, totalPages: { $ceil: { $divide: ["$total", Number(NoOfNews)] } } } }])
 
         // Send the retrieved news items as a response
@@ -169,11 +248,11 @@ const deleteNews = async (req, res) => {
     try {
         /************************************** here also should delete S3 Object, also have to implement that function************************************************/
 
-        
 
-     
+
+
         // Find the document by its _id and delete it
-        const deletedDocument = await News.findOneAndDelete({UUID:uuid});
+        const deletedDocument = await News.findOneAndDelete({ UUID: uuid });
         // console.log(deletedDocument)
         if (!deletedDocument) {
             return res.status(404).json({ message: "Document not found." });
@@ -194,9 +273,9 @@ const UpdateNews = async (req, res) => {
 
     try {
         // Check if a new file is uploaded
-        if (req.file) {
-            const UUID = uuidv4(); // Generate a new unique ID if a new image is uploaded
-            const fileBuffer = req.file.buffer;
+        if (req.files) {
+            // const UUID = uuidv4(); // Generate a new unique ID if a new image is uploaded
+            const fileBuffer = req.files?.buffer;
             const folderPath = Path.join('Blog_Images');
 
             // Create folder if it doesn't exist
@@ -205,7 +284,7 @@ const UpdateNews = async (req, res) => {
             }
 
             // Define new image file name and path
-            const fileName = `${UUID}${req.file.originalname}`;
+            const fileName = `${req.files?.filename}`;
             const filePath = Path.join(folderPath, fileName);
 
             // Save the new image file
@@ -213,11 +292,25 @@ const UpdateNews = async (req, res) => {
 
             // Add the new image URL to the updates object
             updates.ImageURL = `https://gautamsolar.us/admin/blogImage/${fileName}`;
+
+            const folderPath1 = Path.join('Blog_video');
+            if (!fs.existsSync(folderPath1)) {
+                fs.mkdirSync(folderPath1, { recursive: true });
+            }
+            //define the new video
+            const fileName1 = `${req.files?.filename}`;
+            const filePath1 = Path.join(folderPath1, fileName1)
+
+            // Save the new video file
+            fs.writeFileSync(filePath1, fileBuffer)
+            updates.VideoUrl = `https://gautamsolar.us/admin/blogVideo/${fileName1}`;
         }
+
+
 
         // Update document in the News collection
         const updatedDocument = await News.findOneAndUpdate({ UUID: uuid }, updates, { new: true });
-        
+
         if (!updatedDocument) {
             return res.status(404).json({ message: "Document not found." });
         }
@@ -253,4 +346,4 @@ const getNewsByUUID = async (req, res) => {
 
 
 
-module.exports = {  create, getNews, deleteNews, UpdateNews, GetBlogImage,getNewsByUUID }
+module.exports = { create, getNews, deleteNews, UpdateNews, GetBlogImage, getNewsByUUID, GetBlogVideo }

@@ -1,55 +1,54 @@
 const express = require('express')
-const { create, getNews,deleteNews, UpdateNews, GetBlogImage,getNewsByUUID } = require('../Controllers/admin.controller')
+const { create, getNews,deleteNews, UpdateNews, GetBlogImage,getNewsByUUID, GetBlogVideo } = require('../Controllers/admin.controller')
 const multer = require('multer')
 const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
 
+const fs= require("fs")
+const { v4: uuidv4 } = require('uuid');
 
 
-
-
-
-
-
-
-
-
-const storage = multer.memoryStorage({
+//used diskStorage for saving the photo and image with the help of multer
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, '')
+        let folderPath;
+        // in this we check the file is save in image folder or video folder
+        if (file.mimetype.startsWith('image/')) {
+            folderPath = 'Blog_Images';
+        } else if (file.mimetype.startsWith('video/')) {
+            folderPath = 'Blog_Video';
+        }
+
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
+
+        cb(null, folderPath);
+    },
+    filename: function (req, file, cb) {
+        const fileName = `${Date.now()}-${file?.originalname}`;
+        cb(null, fileName);
     }
-})
+});
 
 
-// below variable is define to check the type of file which is uploaded
+// we are applying the filter to check the types of image and video
+const fileFilter = (req, file, cb) => {
+    // Define allowed image and video MIME types
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4', 'video/mpeg', 'video/avi', 'video/webm', 'video/quicktime'];
 
-const filefilter = (req, file, cb) => {
+    if (allowedImageTypes.includes(file.mimetype) || allowedVideoTypes.includes(file.mimetype)) {
+        req.body.FileFormat = file.mimetype; // Store the file format in the request body
+        cb(null, true); // Accept the file
+    } else {
+        cb(new Error('Invalid file type. Only images and videos are allowed.'), false); // Reject the file
+    }
+};
 
-
-    req.body.FileFormat = file.mimetype
-    cb(null, true)
-
-}
-
-const upload = multer({ storage: storage, fileFilter: filefilter });
-
-
-
-/** Send OTP for Verification */
-//UserRouter.post('/sendOTPforEmail', OTPforSignUp)
-
-/** Signup Router */
-//UserRouter.post('/SignUp', Signup)
-
-/*** Login Router */
-//UserRouter.post('/login', Login)
-
-
-/** Sending OTP to Reset Password */
-//UserRouter.put('/otpforResetPassword', updateVerify)
-
-/** To Reset Password */
-//UserRouter.put('/resetPassword', ResetPassword)
+ 
+// here we are uploading the images and video
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 
 /** To Get All News */
@@ -58,12 +57,18 @@ UserRouter.get('/news',getNews)
 /** To Get Blog Image */
 UserRouter.get('/blogImage/:filename',GetBlogImage)
 
-
- /**    authentication Middleware    */
-// UserRouter.use(authentication)
-
 /** To Create News */
-UserRouter.post('/createNews', upload.single('BlogImage'), create)
+
+UserRouter.post('/createNews', upload.fields([
+    { name: 'BlogImage', maxCount: 1 }, // Accepts 1 image file
+    { name: 'BlogVideo', maxCount: 1 }  // Accepts 1 video file
+]), create);
+
+
+
+// to get videoBlog
+ UserRouter.get("/blogVideo/:filename",GetBlogVideo);
+
 
 /** To Delete News  */
 UserRouter.delete('/delete', deleteNews)

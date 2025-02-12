@@ -6,7 +6,10 @@ const NewsSchema = mongoose.Schema({
     },
     ImageURL: {
         type: String,
-        required: true,
+        trim: true, // Trim whitespac
+    },
+    VideoUrl: {
+        type: String,
         trim: true, // Trim whitespac
     },
     Tags:{

@@ -18,7 +18,10 @@ function extractWebsiteName(domain) {
   }
   return domainParts.join('.');
 }
+const path=require("path")
 
+app.use('/admin/blogImage', express.static(path.join(__dirname, 'Blog_Images')));
+app.use('/admin/blogVideo', express.static(path.join(__dirname, 'Blog_Video')));
 
 
 // Nodemailer configuration for SMTP
