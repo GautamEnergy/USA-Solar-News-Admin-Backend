@@ -6,6 +6,7 @@ const UserRouter = express.Router()
 
 const fs= require("fs")
 const { v4: uuidv4 } = require('uuid');
+const path=require('path');
 
 
 //used diskStorage for saving the photo and image with the help of multer
@@ -28,6 +29,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const fileName = `${Date.now()}-${file?.originalname}`;
         cb(null, fileName);
+       
     }
 });
 
@@ -48,7 +50,7 @@ const fileFilter = (req, file, cb) => {
 
  
 // here we are uploading the images and video
-const upload = multer({ storage: storage, fileFilter: fileFilter,limits: { fileSize: 1024  * 1024 * 50 }  });
+const upload = multer({ storage: storage, fileFilter: fileFilter,limits: { fileSize: 1024  * 1024 * 50,  fieldSize: 10 * 1024 * 1024, }  });
 
 
 /** To Get All News */
@@ -76,6 +78,10 @@ UserRouter.post('/news/edit', getNewsByUUID);
 
 
 /** To Update News */
-UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
+// UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
+UserRouter.patch('/updateNews/:uuid', upload.fields([
+    { name: 'BlogImage', maxCount: 1 },
+    { name: 'BlogVideo', maxCount: 1 } 
+]),UpdateNews)
 
 module.exports = { UserRouter } 
