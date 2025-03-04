@@ -135,13 +135,13 @@ const createBlog = async (req, res) => {
     // will change the url
     const videofilePath = videoFileName
       ? 
-      `http://localhost:1008/galo_admin/blogVideo/${videoFileName}`
+      `https://gautamsolar.us/galo_admin/blogVideo/${videoFileName}`
     //   `https://.us/galo_admin/blogVideo/${videoFileName}`
       : null;
 
     const imagefilePath = imageFileName
       ?
-       `http://localhost:1008/galo_admin/blogImage/${imageFileName}`
+       `https://gautamsolar.us/galo_admin/blogImage/${imageFileName}`
     //    `https://.us/galo_admin/blogImage/${imageFileName}`
       : null;
 
