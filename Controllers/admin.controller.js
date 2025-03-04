@@ -404,7 +404,7 @@ const UpdateNews = async (req, res) => {
           fs.writeFileSync(filePath1, fileBuffer);
         }
         videofilePath = videoFileName
-          ? `https://gautamsolar.us/admin/blogImage/${videoFileName}`
+          ? `https://gautamsolar.us/admin/blogVideo/${videoFileName}`
           : //   `http://localhost:1008/admin/blogVideo/${videoFileName}`
             null;
         updates.VideoUrl = videofilePath;
