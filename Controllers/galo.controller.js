@@ -79,7 +79,7 @@ const GetGaloBlogVideo = async (req, res) => {
 const createBlog = async (req, res) => {
   try {
     const UUID = req.body.UUID || uuidv4();
-    const { Header, Description, Body, tags } = req.body;
+    const { Header, Description, Body, Tags } = req.body;
 
     if (!Header)
       return res
@@ -153,7 +153,7 @@ const createBlog = async (req, res) => {
       Header: Header,
       Description: Description,
       Body: Body,
-      Tags: tags,
+      Tags: Tags,
     };
 
     /** Check if document with UUID exists */
