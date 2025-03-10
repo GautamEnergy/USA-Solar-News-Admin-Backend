@@ -43,10 +43,6 @@ const createSlug = (header) => {
 
 /** ################################################################### */
 const create = async (req, res) => {
-  /** making file in Blog_Images folder */
-
-  // console.log(req.files);
-
   try {
     const UUID = req.body.UUID || uuidv4(); // Use provided UUID or generate a new one
     const { Header, Description, Body, tags } = req.body;
@@ -105,12 +101,16 @@ const create = async (req, res) => {
         fs.writeFileSync(filePath1, fileBuffer);
       }
     }
-    const videofilePath = videoFileName ? `https://gautamsolar.us/admin/blogVideo/${videoFileName}` : null;
+    const videofilePath = videoFileName
+      ? `https://gautamsolar.us/admin/blogVideo/${videoFileName}`
+      : null;
     // const videofilePath = videoFileName
     //   ? `http://localhost:1008/admin/blogVideo/${videoFileName}`
     //   : null;
 
-    const imagefilePath = imageFileName ? `https://gautamsolar.us/admin/blogImage/${imageFileName}` : null;
+    const imagefilePath = imageFileName
+      ? `https://gautamsolar.us/admin/blogImage/${imageFileName}`
+      : null;
     // const imagefilePath = imageFileName
     //   ? `http://localhost:1008/admin/blogImage/${imageFileName}`
     //   : null;
@@ -203,7 +203,6 @@ const GetBlogVideo = (req, res) => {
 
 /** ################################################################### */
 
-/** Delete News */
 const getNews = async (req, res) => {
   const { NoOfNews, Page } = req.query;
 
@@ -451,6 +450,20 @@ const getNewsByUUID = async (req, res) => {
   }
 };
 
+// to convert base64 image to url image for seo
+const ConvertImageUrl = async (req, res) => {
+  try {
+    let imageUrl;
+    if (req.file) {
+      imageUrl = `https://gautam.us/admin/blogImage/${req.file.filename}`;
+    }
+
+    return res.status(200).json({ data: imageUrl });
+  } catch (er) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   create,
   getNews,
@@ -459,4 +472,5 @@ module.exports = {
   GetBlogImage,
   getNewsByUUID,
   GetBlogVideo,
+  ConvertImageUrl,
 };

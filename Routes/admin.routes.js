@@ -1,5 +1,5 @@
 const express = require('express')
-const { create, getNews,deleteNews, UpdateNews, GetBlogImage,getNewsByUUID, GetBlogVideo } = require('../Controllers/admin.controller')
+const { create, getNews,deleteNews, UpdateNews, GetBlogImage,getNewsByUUID, GetBlogVideo, ConvertImageUrl } = require('../Controllers/admin.controller')
 const multer = require('multer')
 const {authentication} = require('../Middleware/authentication')
 const UserRouter = express.Router()
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
         cb(null, folderPath);
     },
     filename: function (req, file, cb) {
-        const fileName = `${Date.now()}-${file?.originalname}`;
+        const fileName = `${Date.now()}-${file?.originalname.replace(/\s+/g, "_")}`;
         cb(null, fileName);
        
     }
@@ -51,7 +51,6 @@ const fileFilter = (req, file, cb) => {
  
 // here we are uploading the images and video
 const upload = multer({ storage: storage, fileFilter: fileFilter,limits: { fileSize: 1024  * 1024 * 50,  fieldSize: 10 * 1024 * 1024, }  });
-
 
 /** To Get All News */
 UserRouter.get('/news',getNews)
@@ -78,10 +77,13 @@ UserRouter.post('/news/edit', getNewsByUUID);
 
 
 /** To Update News */
-// UserRouter.patch('/updateNews',upload.single('UpdateNewsImage'),UpdateNews)
+
 UserRouter.patch('/updateNews/:uuid', upload.fields([
     { name: 'BlogImage', maxCount: 1 },
     { name: 'BlogVideo', maxCount: 1 } 
 ]),UpdateNews)
+
+
+UserRouter.post('/convert_image_url',upload.single('image'),ConvertImageUrl);
 
 module.exports = { UserRouter } 
