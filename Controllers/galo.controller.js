@@ -279,7 +279,7 @@ const UpdateGaloNews=async(req,res)=>{
             fs.writeFileSync(filePath, fileBuffer);
           }
           imagefilePath = imageFileName
-            ? `http://localhost:1008/galo_admin/blogImage/${imageFileName}`
+            ? `https://gautamsolar.us/galo_admin/blogImage/${imageFileName}`
             : //    `http://localhost:1008/admin/blogImage/${imageFileName}`
               null;
           updates.ImageURL = imagefilePath;
@@ -304,7 +304,7 @@ const UpdateGaloNews=async(req,res)=>{
             fs.writeFileSync(filePath1, fileBuffer);
           }
           videofilePath = videoFileName
-            ? `http://localhost:1008/galo_admin/blogVideo/${videoFileName}`
+            ? `https://gautamsolar.us/galo_admin/blogVideo/${videoFileName}`
             : //   `http://localhost:1008/admin/blogVideo/${videoFileName}`
               null;
           updates.VideoUrl = videofilePath;

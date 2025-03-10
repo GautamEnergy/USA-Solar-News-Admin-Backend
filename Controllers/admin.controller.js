@@ -455,7 +455,7 @@ const ConvertImageUrl = async (req, res) => {
   try {
     let imageUrl;
     if (req.file) {
-      imageUrl = `https://gautam.us/admin/blogImage/${req.file.filename}`;
+      imageUrl = `https://gautamsolar.us/admin/blogImage/${req.file.filename}`;
     }
 
     return res.status(200).json({ data: imageUrl });
