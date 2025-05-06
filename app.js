@@ -78,6 +78,11 @@ app.post("/submit-contactus", async (req, res) => {
     const referrerUrl = req.headers.referer || "Unknown"; // Get the referrer URL
     const referrerDomain = url.parse(referrerUrl).hostname; // Extract the domain name from the URL
     const referrerWebsite = extractWebsiteName(referrerDomain); // Extract the website name from the domain name
+       
+    let utm;
+    if(formData.utm!==null){
+       utm=JSON.parse(formData.utm);
+    }
 
     const checkboxValues = Object.keys(formData).filter(
       (key) => formData[key] === "Yes"
@@ -104,7 +109,7 @@ app.post("/submit-contactus", async (req, res) => {
         ${checkboxList}
       </ul>
       <p style="margin-bottom: 10px;"><strong>Source:</strong> ${referrerWebsite}</p>
-      <p style="margin-bottom: 10px;"><strong>UTM Source:</strong> ${req.cookies.utm_source?req.cookies.utm_source:'Not Provided'}</p>
+      <p style="margin-bottom: 10px;"><strong>UTM Source:</strong> ${utm?.utm_source||'Direct'}</p>
     </div>
       `,
     };
@@ -129,6 +134,10 @@ app.post("/submit-contactbox", async (req, res) => {
     // const utmSource = req.body.utm_source || req.query.utm_source || "Not provided";
 
     // ... (Any additional validation or processing for Contact Box form data)
+    let utm;
+    if(formData.utm!==null){
+       utm=JSON.parse(formData.utm);
+    }
 
     const mailOptions = {
       from: "gautamsolar.vidoes01@gmail.com", // sender email
@@ -144,7 +153,7 @@ app.post("/submit-contactbox", async (req, res) => {
       <p style="margin-bottom: 10px;"><strong>Willing to invest:</strong> ${formData.option}</p>
       <p style="margin-bottom: 10px;"><strong>Remarks:</strong> ${formData.message}</p>
       <p style="margin-bottom: 10px;"><strong>Source:</strong> ${referrerWebsite}</p>
-        <p style="margin-bottom: 10px;"><strong>UTM Source:</strong> ${req.cookies.utm_source?req.cookies.utm_source:'Not Provided'}</p>
+        <p style="margin-bottom: 10px;"><strong>UTM Source:</strong> ${utm?.utm_source||'Direct'}}</p>
     </div>
       `,
     };
